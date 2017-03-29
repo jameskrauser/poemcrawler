@@ -62,5 +62,9 @@ func (t ShiGeKu) GetPoems() (poems []util.Poem) {
 	})
 
 	// 第一个数据是诗人简介，所以只返回后面的数据
-	return poems[1:]
+	if len(poems) > 0 {
+		return poems[1:]
+	}
+
+	return poems
 }
