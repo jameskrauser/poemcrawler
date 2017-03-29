@@ -25,12 +25,12 @@ func (e *Ext) Visit(ctx *gocrawl.URLContext, res *http.Response, doc *goquery.Do
 	ctx.URL().String()
 	switch doc.Url.Host {
 	case "www.shiku.org":
-		c := htmltype.NewShiKu(ctx.URL().String())
-		poems := c.Parse(doc)
+		c := htmltype.NewShiKu(ctx, res, doc)
+		poems := c.GetPoems()
 		util.Save(fn, poems)
 	case "www.shigeku.com":
-		c := htmltype.NewShiGeKu(ctx.URL().String())
-		poems := c.Parse(doc)
+		c := htmltype.NewShiGeKu(ctx, res, doc)
+		poems := c.GetPoems()
 		util.Save(fn, poems)
 	}
 
@@ -57,11 +57,13 @@ func main() {
 	opts.CrawlDelay = 1 * time.Second
 	opts.LogFlags = gocrawl.LogError
 	opts.SameHostOnly = false
-	opts.MaxVisits = 9999999999
+	opts.MaxVisits = 1//9999999999
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
 	//c.Run("http://www.shiku.org/shiku/xs/xuzhimo.htm")
-	//c.Run("http://www.shigeku.com/xlib/xd/sgdq/ajian.htm")
-	c.Run("http://www.shiku.org/shiku/xs/index.htm")
+	c.Run("http://www.shigeku.com/xlib/xd/sgdq/ajian.htm")
+	//c.Run("http://www.shigeku.com/xlib/xd/sgdq/caitianxin.htm")
+
+	//c.Run("http://www.shiku.org/shiku/xs/index.htm")
 
 }
