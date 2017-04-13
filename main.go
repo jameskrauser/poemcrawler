@@ -9,6 +9,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"strings"
 
+	"poemcrawler/dispatcher"
 )
 
 type Ext struct {
@@ -18,19 +19,8 @@ type Ext struct {
 func (e *Ext) Visit(ctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) (interface{}, bool) {
 	fmt.Printf("Visit: %s\n", ctx.URL())
 
-	//d := main.NewDispatcher(ctx, res, doc)
-	//d.Dispatch()
-
-
-
-	fmt.Println(doc.Url.Fragment)
-	fmt.Println(doc.Url.Opaque)
-	fmt.Println(doc.Url.RawPath)
-	fmt.Println(doc.Url.RawQuery)
-	fmt.Println(doc.Url.Scheme)
-	fmt.Println(doc.Url.User)
-	fmt.Println(doc.Url)
-
+	d := dispatcher.NewDispatcher(ctx, res, doc)
+	d.Dispatch()
 
 	return nil, true
 }
@@ -58,6 +48,8 @@ func main() {
 	opts.MaxVisits = 9999999999
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
-	c.Run("http://www.shiku.org/shiku/index.htm")
+	c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/xuzhimo.htm")
+	//c.Run("http://www.shiku.org/shiku/index.htm")
 
 }

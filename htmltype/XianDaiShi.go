@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"poemcrawler/util"
 	"strings"
+	"fmt"
 )
 
 // 处理现代诗歌的类型
-// 页面样例 http://www.shiku.org/shiku/gs/beichao.htm
+// 页面样例 http://www.shiku.org/shiku/xs/xuzhimo.htm
 type XianDaiShi struct {
 	uctx *gocrawl.URLContext
 	res  *http.Response
@@ -48,7 +49,8 @@ func (t XianDaiShi) GetPoems() (poems []util.Poem) {
 		titleBytes := []byte(gbkTitle)
 		title := util.GBK2Unicode(titleBytes)
 
-		gbkContent := s.Next().Next().Text()
+		fmt.Print(s.NextUntil("p[align=\"center\"]").Children().Html())
+		gbkContent := s.Next().Next().NextAll().Text()//s.NextUntil("p[align=\"center\"]").Text() // s.Next().Next().Text()
 		contentBytes := []byte(gbkContent)
 		content := util.GBK2Unicode(contentBytes)
 		//content = strings.Replace(content, " ", "", -1)
