@@ -7,10 +7,8 @@ import (
 
 	"github.com/PuerkitoBio/gocrawl"
 	"github.com/PuerkitoBio/goquery"
-
-	"poemcrawler/htmltype"
-	"poemcrawler/util"
 	"strings"
+
 )
 
 type Ext struct {
@@ -19,20 +17,20 @@ type Ext struct {
 
 func (e *Ext) Visit(ctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) (interface{}, bool) {
 	fmt.Printf("Visit: %s\n", ctx.URL())
-	ps := strings.Split(ctx.URL().Path, "/")
-	fn := ps[len(ps)-1] + "l"
 
-	ctx.URL().String()
-	switch doc.Url.Host {
-	case "www.shiku.org":
-		c := htmltype.NewShiKu(ctx, res, doc)
-		poems := c.GetPoems()
-		util.Save(fn, poems)
-	case "www.shigeku.com":
-		c := htmltype.NewShiGeKu(ctx, res, doc)
-		poems := c.GetPoems()
-		util.Save(fn, poems)
-	}
+	//d := main.NewDispatcher(ctx, res, doc)
+	//d.Dispatch()
+
+
+
+	fmt.Println(doc.Url.Fragment)
+	fmt.Println(doc.Url.Opaque)
+	fmt.Println(doc.Url.RawPath)
+	fmt.Println(doc.Url.RawQuery)
+	fmt.Println(doc.Url.Scheme)
+	fmt.Println(doc.Url.User)
+	fmt.Println(doc.Url)
+
 
 	return nil, true
 }
@@ -41,12 +39,12 @@ func (e *Ext) Filter(ctx *gocrawl.URLContext, isVisited bool) bool {
 	if isVisited {
 		return false
 	}
-	//if ctx.URL().Host == "github.com" || ctx.URL().Host == "golang.org" || ctx.URL().Host == "0value.com" {
-	//	return true
-	//}
-	if ctx.URL().Host == "www.shiku.org" || ctx.URL().Host == "www.shigeku.com" {
+
+	if ctx.URL().Host == "www.shiku.org" && (strings.Contains(ctx.URL().Path, ".htm") ||
+		strings.Contains(ctx.URL().Path, ".html")) {
 		return true
 	}
+
 	return false
 }
 
@@ -57,13 +55,9 @@ func main() {
 	opts.CrawlDelay = 1 * time.Second
 	opts.LogFlags = gocrawl.LogError
 	opts.SameHostOnly = false
-	opts.MaxVisits = 1//9999999999
+	opts.MaxVisits = 9999999999
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
-	//c.Run("http://www.shiku.org/shiku/xs/xuzhimo.htm")
-	c.Run("http://www.shigeku.com/xlib/xd/sgdq/ajian.htm")
-	//c.Run("http://www.shigeku.com/xlib/xd/sgdq/caitianxin.htm")
-
-	//c.Run("http://www.shiku.org/shiku/xs/index.htm")
+	c.Run("http://www.shiku.org/shiku/index.htm")
 
 }

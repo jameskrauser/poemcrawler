@@ -8,17 +8,19 @@ import (
 	"strings"
 )
 
-type ShiKu struct {
+// 处理现代诗歌的类型
+// 页面样例 http://www.shiku.org/shiku/gs/beichao.htm
+type XianDaiShi struct {
 	uctx *gocrawl.URLContext
 	res  *http.Response
 	doc  *goquery.Document
 }
 
-func NewShiKu(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *ShiKu {
-	return &ShiKu{uctx: uctx, res: res, doc: doc}
+func NewXianDaiShi(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *XianDaiShi {
+	return &XianDaiShi{uctx: uctx, res: res, doc: doc}
 }
 
-func (t ShiKu) GetPoet() util.Poet {
+func (t XianDaiShi) GetPoet() util.Poet {
 	gbkAuthor := t.doc.Find("body").Find("h1").Text()
 	authorBytes := []byte(gbkAuthor)
 	author := util.GBK2Unicode(authorBytes)
@@ -36,7 +38,7 @@ func (t ShiKu) GetPoet() util.Poet {
 	return poet
 }
 
-func (t ShiKu) GetPoems() (poems []util.Poem) {
+func (t XianDaiShi) GetPoems() (poems []util.Poem) {
 	poems = make([]util.Poem, 0)
 
 	poet := t.GetPoet()
