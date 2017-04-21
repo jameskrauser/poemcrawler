@@ -5,6 +5,7 @@ import (
 
 	"github.com/axgle/mahonia"
 	"io/ioutil"
+	"strings"
 )
 
 func GBK2Unicode(data []byte) string {
@@ -23,7 +24,7 @@ func GBK2Unicode(data []byte) string {
 func Save(fn, url string, p []Poem) {
 	b := url
 	for _, v := range p {
-		b += v.Author + "\r\n" + v.Title + "\r\n\r\n" + v.Body + "\r\n" + v.Source + "\r\n\r\n"
+		b += v.Author + "\r\n" + v.Title + "\r\n" + v.Subtitle + "\r\n\r\n" + v.Body + "\r\n" + v.Source + "\r\n\r\n"
 	}
 	bytes := []byte(b)
 
@@ -31,4 +32,39 @@ func Save(fn, url string, p []Poem) {
 	if e != nil {
 		fmt.Println(e)
 	}
+}
+
+func TrimRightSpace(s string) string {
+	if s == "" {
+		return s
+	}
+
+	for {
+		if strings.HasSuffix(s, " ") {
+			s = strings.TrimSuffix(s, " ")
+			s = strings.TrimSuffix(s, "\r\n")
+			s = strings.TrimSuffix(s, "\r")
+			s = strings.TrimSuffix(s, "\n")
+		} else {
+			break
+		}
+		if strings.HasSuffix(s, "\r") {
+			s = strings.TrimSuffix(s, " ")
+			s = strings.TrimSuffix(s, "\r\n")
+			s = strings.TrimSuffix(s, "\r")
+			s = strings.TrimSuffix(s, "\n")
+		} else {
+			break
+		}
+		if strings.HasSuffix(s, "\n") {
+			s = strings.TrimSuffix(s, " ")
+			s = strings.TrimSuffix(s, "\r\n")
+			s = strings.TrimSuffix(s, "\r")
+			s = strings.TrimSuffix(s, "\n")
+		} else {
+			break
+		}
+	}
+
+	return s
 }

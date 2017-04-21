@@ -48,8 +48,12 @@ func main() {
 	opts.MaxVisits = 9999999999
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
-	c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/xuzhimo.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/mudan.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/guangweiran.htm")
+	c.Run("http://www.shiku.org/shiku/xs/zhengmin.htm")
+
 	//c.Run("http://www.shiku.org/shiku/index.htm")
 
 }
