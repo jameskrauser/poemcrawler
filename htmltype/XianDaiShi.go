@@ -7,6 +7,10 @@ import (
 	"net/http"
 	"poemcrawler/util"
 	"strings"
+	//"strconv"
+	//"fmt"
+	"strconv"
+	"fmt"
 )
 
 // 处理现代诗歌的类型
@@ -194,8 +198,90 @@ func (t XianDaiShi) GetPoemsPAndP() (poems []util.Poem) {
 	return
 }
 
+// 标题为p align="left" 标签，一个标签对应一卷，一卷内包含多首诗歌
+// 例子页面 http://www.shiku.org/shiku/xs/zhengmin.htm
+// 处理方案：在a标签后添加分隔符，然后获取所有文本，解析出诗歌标题和内容
+func (t XianDaiShi) GetPoemsT3() (poems []util.Poem) {
+	titles := make([]string, 0, 0)
+	poet := t.GetPoet()
+	poems = make([]util.Poem, 0, 0)
+	sep := "=============="
+
+	has999999 := false
+	t.doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
+		href, existHref := s.Attr("href")
+		if existHref {
+			fmt.Println(href)
+			if strings.HasPrefix(href, "#") {
+				//fmt.Println(strconv.Atoi(strings.TrimLeft(href, "#")))
+				_, err := strconv.Atoi(strings.TrimLeft(href, "#"))
+
+				if err == nil {
+					gbkTitle := s.Text()
+					titleBytes := []byte(gbkTitle)
+					title := strings.TrimSpace(util.GBK2Unicode(titleBytes))
+					titles = append(titles, title)
+				}
+
+			}
+		}
+
+		name, existName := s.Attr("name")
+		if existName {
+			t.doc.Find("body").Find("a[name=\"" + name + "\"]").AppendHtml(sep)
+		}
+
+		if name == "999999" {
+			has999999 = true
+		}
+	})
+
+	gbkText := t.doc.Text()
+	TextBytes := []byte(gbkText)
+	text := strings.TrimSpace(util.GBK2Unicode(TextBytes))
+	//中国诗歌库 中华诗库 中国诗典 中国诗人 中国诗坛 首页
+	text = strings.Replace(text, "中国诗歌库", "", -1)
+	text = strings.Replace(text, "中华诗库", "", -1)
+	text = strings.Replace(text, "中国诗典", "", -1)
+	text = strings.Replace(text, "中国诗人", "", -1)
+	text = strings.Replace(text, "中国诗坛", "", -1)
+	text = strings.Replace(text, "首页", "", -1)
+	text = strings.TrimSpace(text)
+
+	textArr := strings.Split(text, sep)
+	if strings.Contains(text, sep) {
+		content := textArr[1:]
+		fmt.Println(len(content))
+		fmt.Println(len(titles))
+		num := len(content)
+		if has999999 {
+			num = len(content) - 1
+		}
+
+		for i := 0; i < num; i++ {
+			whole := strings.TrimSpace(sep + content[i])
+			title := titles[i]
+			body := strings.Replace(whole, sep+title, "", -1)
+			poem := util.Poem{
+				Author: poet.Name,
+				Source: t.uctx.URL().String(),
+				Title:  title,
+				//Subtitle: subTitle,
+				//Volume: volume,
+				Body: body,
+			}
+
+			poems = append(poems, poem)
+
+		}
+	}
+
+	return
+}
+
 func (t XianDaiShi) GetPoems() []util.Poem {
-	return t.GetPoemsPAndP()
+	//return t.GetPoemsPAndP()
+	return t.GetPoemsT3()
 	//if t.isNeedParseFromPureText() {
 	//	fmt.Println("使用纯文本解析的方式获取诗歌，此方法有风险")
 	//	return t.GetPoemsByPureTextAnalysis()

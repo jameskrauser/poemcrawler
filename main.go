@@ -7,9 +7,9 @@ import (
 
 	"github.com/PuerkitoBio/gocrawl"
 	"github.com/PuerkitoBio/goquery"
-	"strings"
 
 	"poemcrawler/dispatcher"
+	"strings"
 )
 
 type Ext struct {
@@ -45,15 +45,16 @@ func main() {
 	opts.CrawlDelay = 1 * time.Second
 	opts.LogFlags = gocrawl.LogError
 	opts.SameHostOnly = false
-	opts.MaxVisits = 9999999999
+	opts.MaxVisits = 99999
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
 	//c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/xuzhimo.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/mudan.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/guangweiran.htm")
-	c.Run("http://www.shiku.org/shiku/xs/zhengmin.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/zhengmin.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/yeshibin.htm")
 
-	//c.Run("http://www.shiku.org/shiku/index.htm")
+	c.Run("http://www.shiku.org/shiku/index.htm")
 
 }
