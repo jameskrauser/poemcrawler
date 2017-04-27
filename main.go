@@ -54,6 +54,11 @@ func main() {
 	//c.Run("http://www.shiku.org/shiku/xs/guangweiran.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/zhengmin.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/yeshibin.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/shiwei.htm")
+	//c.Run("http://www.shiku.org/shiku/ws/ww/homer.htm")
+
+	// 标题不是链接: http://www.shiku.org/shiku/ws/wg/corneille.htm
+	c.Run("http://www.shiku.org/shiku/ws/wg/corneille.htm")
 
 	c.Run("http://www.shiku.org/shiku/index.htm")
 
