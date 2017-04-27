@@ -45,7 +45,7 @@ func main() {
 	opts.CrawlDelay = 1 * time.Second
 	opts.LogFlags = gocrawl.LogError
 	opts.SameHostOnly = false
-	opts.MaxVisits = 99999
+	opts.MaxVisits = 999999
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
 	//c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
@@ -58,7 +58,7 @@ func main() {
 	//c.Run("http://www.shiku.org/shiku/ws/ww/homer.htm")
 
 	// 标题不是链接: http://www.shiku.org/shiku/ws/wg/corneille.htm
-	c.Run("http://www.shiku.org/shiku/ws/wg/corneille.htm")
+	//c.Run("http://www.shiku.org/shiku/ws/wg/corneille.htm")
 
 	c.Run("http://www.shiku.org/shiku/index.htm")
 

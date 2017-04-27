@@ -139,13 +139,17 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 	gbkText := t.doc.Text()
 	TextBytes := []byte(gbkText)
 	text := strings.TrimSpace(util.GBK2Unicode(TextBytes))
-	//中国诗歌库 中华诗库 中国诗典 中国诗人 中国诗坛 首页
+	// 去掉页脚文字：中国诗歌库 中华诗库 中国诗典 中国诗人 中国诗坛 首页
 	text = strings.Replace(text, "中国诗歌库", "", -1)
 	text = strings.Replace(text, "中华诗库", "", -1)
 	text = strings.Replace(text, "中国诗典", "", -1)
 	text = strings.Replace(text, "中国诗人", "", -1)
 	text = strings.Replace(text, "中国诗坛", "", -1)
 	text = strings.Replace(text, "首页", "", -1)
+	// 可能页面底部有以_uacct开头的js文字
+	// 例如页面： http://www.shiku.org/shiku/ws/wg/corneille.htm
+	index := strings.Index(text, "_uacct")
+	text = text[0:index]
 	text = strings.TrimSpace(text)
 
 	textArr := strings.Split(text, sep)
@@ -157,23 +161,38 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 
 		fmt.Println("解析到的诗歌体数量为：", len(content))
 		fmt.Println("解析到的诗歌标题数量为：", len(titles))
-		count := len(content)
-		//if has999999 {
-		//	count = len(content) - 1
-		//}
 
-		for i := 0; i < count; i++ {
-			whole := strings.TrimSpace(sep + content[i])
-			title := titles[i]
-			body := strings.Replace(whole, sep+title, "", -1)
-			poem := util.Poem{
-				Author: poet.Name,
-				Source: t.uctx.URL().String(),
-				Title:  title,
-				Body:   body,
+		// 标题非链接的情况，获取不到标题，例如： http://www.shiku.org/shiku/ws/wg/corneille.htm
+		if len(titles) == 0 && len(content) != 0 {
+			for _, whole := range content {
+				title := strings.Split(whole, " ")[0]
+				str := strings.TrimSpace(whole)
+				body := strings.TrimLeft(str, title)
+
+				poem := util.Poem{
+					Author: poet.Name,
+					Source: t.uctx.URL().String(),
+					Title:  title,
+					Body:   body,
+				}
+
+				poems = append(poems, poem)
 			}
+		} else {
+			count := len(content)
+			for i := 0; i < count; i++ {
+				whole := strings.TrimSpace(sep + content[i])
+				title := titles[i]
+				body := strings.Replace(whole, sep+title, "", -1)
+				poem := util.Poem{
+					Author: poet.Name,
+					Source: t.uctx.URL().String(),
+					Title:  title,
+					Body:   body,
+				}
 
-			poems = append(poems, poem)
+				poems = append(poems, poem)
+			}
 		}
 	}
 
