@@ -149,7 +149,10 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 	// 可能页面底部有以_uacct开头的js文字
 	// 例如页面： http://www.shiku.org/shiku/ws/wg/corneille.htm
 	index := strings.Index(text, "_uacct")
-	text = text[0:index]
+	if index > 0 {
+		text = text[0:index]
+	}
+
 	text = strings.TrimSpace(text)
 
 	textArr := strings.Split(text, sep)
@@ -161,9 +164,11 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 
 		fmt.Println("解析到的诗歌体数量为：", len(content))
 		fmt.Println("解析到的诗歌标题数量为：", len(titles))
+		fmt.Println(content)
 
 		// 标题非链接的情况，获取不到标题，例如： http://www.shiku.org/shiku/ws/wg/corneille.htm
-		if len(titles) == 0 && len(content) != 0 {
+		// 标题链接少于实际的诗歌体数量的情况，例如：http://www.shiku.org/shiku/ws/wg/mallarme.htm
+		if len(titles) != len(content) {
 			for _, whole := range content {
 				title := strings.Split(whole, " ")[0]
 				str := strings.TrimSpace(whole)
