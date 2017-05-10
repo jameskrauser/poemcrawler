@@ -164,7 +164,6 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 
 		fmt.Println("解析到的诗歌体数量为：", len(content))
 		fmt.Println("解析到的诗歌标题数量为：", len(titles))
-		fmt.Println(content)
 
 		// 标题非链接的情况，获取不到标题，例如： http://www.shiku.org/shiku/ws/wg/corneille.htm
 		// 标题链接少于实际的诗歌体数量的情况，例如：http://www.shiku.org/shiku/ws/wg/mallarme.htm

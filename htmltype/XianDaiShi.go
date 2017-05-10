@@ -14,17 +14,17 @@ import (
 // 页面样例 http://www.shiku.org/shiku/xs/xuzhimo.htm
 type XianDaiShi struct {
 	Base *ShiKu
-	uctx  *gocrawl.URLContext
-	res   *http.Response
-	doc   *goquery.Document
+	uctx *gocrawl.URLContext
+	res  *http.Response
+	doc  *goquery.Document
 }
 
 func NewXianDaiShi(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *XianDaiShi {
 	return &XianDaiShi{
 		Base: NewShiKu(uctx, res, doc),
-		uctx:  uctx,
-		res:   res,
-		doc:   doc,
+		uctx: uctx,
+		res:  res,
+		doc:  doc,
 	}
 }
 
@@ -108,6 +108,39 @@ func (t XianDaiShi) GetPoemsPAndP() (poems []util.Poem) {
 			poems = append(poems, poem)
 		}
 	})
+
+	return
+}
+
+// 获取诗集中的单首诗歌，返回只有一首诗歌的诗歌数组
+// 例子页面：http://www.shiku.org/shiku/xs/haizi/100.htm
+func (t XianDaiShi) GetOnePoemFromCollection() (poems []util.Poem) {
+	gbkTitle := t.doc.Find("body").Find("h1").Text()
+	titleBytes := []byte(gbkTitle)
+	title := strings.TrimSpace(util.GBK2Unicode(titleBytes))
+
+	gbkAuthor := t.doc.Find("a").Eq(0).Text()
+	authorBytes := []byte(gbkAuthor)
+	author := strings.TrimSpace(util.GBK2Unicode(authorBytes))
+	author = strings.Replace(author, "诗集", "", -1)
+
+	gbkPoemBody := t.doc.Find("pre").Text()
+	poemBodyBytes := []byte(gbkPoemBody)
+	poemBody := strings.TrimSpace(util.GBK2Unicode(poemBodyBytes))
+
+	poems = make([]util.Poem, 0, 0)
+	if title == "诗人简介" {
+		return
+	}
+
+	poem := util.Poem{
+		Author: author,
+		Source: t.uctx.URL().String(),
+		Title:  title,
+		Body:   poemBody,
+	}
+
+	poems = append(poems, poem)
 
 	return
 }

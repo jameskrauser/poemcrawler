@@ -22,7 +22,7 @@ func GBK2Unicode(data []byte) string {
 }
 
 func Save(fn, url string, p []Poem) {
-	b := url
+	b := url + "\r\n"
 	for _, v := range p {
 		b += v.Author + "\r\n" + v.Title + "\r\n" + v.Subtitle + "\r\n\r\n" + v.Body + "\r\n" + v.Source + "\r\n\r\n"
 	}
