@@ -21,10 +21,11 @@ func GBK2Unicode(data []byte) string {
 	return string(ret)
 }
 
-func Save(fn, url string, p []Poem) {
-	b := url + "\r\n"
-	for _, v := range p {
-		b += v.Author + "\r\n" + v.Title + "\r\n" + v.Subtitle + "\r\n\r\n" + v.Body + "\r\n" + v.Source + "\r\n\r\n"
+func SaveToFile(fn, url string, poet Poet, poems []Poem) {
+	b := "网页地址：" + url + "\r\n\r\n诗人名字：" + poet.Name + "\r\n\r\n诗人简介：" + poet.Intro+"\r\n\r\n"
+	for _, poem := range poems {
+		b += "作者：" + poem.Author + "\r\n\r\n诗歌标题：" + poem.Title + "\r\n\r\n诗歌副标题：" +
+			poem.Subtitle + "\r\n\r\n诗歌内容：" + poem.Body + "\r\n\r\n诗歌出处：" + poem.Source + "\r\n\r\n"
 	}
 	bytes := []byte(b)
 
@@ -32,6 +33,30 @@ func Save(fn, url string, p []Poem) {
 	if e != nil {
 		fmt.Println(e)
 	}
+}
+
+func CheckPoet(p Poet) bool {
+	name := strings.Replace(p.Name, " ", "", -1)
+	intro := strings.Replace(p.Intro, " ", "", -1)
+
+	if name == "" || intro == "" {
+		return true
+	}
+	return false
+}
+
+func CheckPoems(ps []Poem) bool {
+	for _, p := range ps {
+		author := strings.Replace(p.Author, " ", "", -1)
+		title := strings.Replace(p.Title, " ", "", -1)
+		body := strings.Replace(p.Body, " ", "", -1)
+
+		if author == "" || title == "" || body == "" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func TrimRightSpace(s string) string {

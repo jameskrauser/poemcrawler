@@ -13,10 +13,10 @@ import (
 // 处理现代诗歌的类型
 // 页面样例 http://www.shiku.org/shiku/xs/xuzhimo.htm
 type XianDaiShi struct {
-	Base *ShiKu
-	uctx *gocrawl.URLContext
-	res  *http.Response
-	doc  *goquery.Document
+	Base          *ShiKu
+	uctx          *gocrawl.URLContext
+	res           *http.Response
+	doc           *goquery.Document
 }
 
 func NewXianDaiShi(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *XianDaiShi {

@@ -14,6 +14,7 @@ type ShiKu struct {
 	uctx *gocrawl.URLContext
 	res  *http.Response
 	doc  *goquery.Document
+	HasParseError bool
 }
 
 func NewShiKu(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *ShiKu {

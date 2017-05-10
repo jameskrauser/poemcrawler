@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"poemcrawler/htmltype"
 	"poemcrawler/util"
+	"poemcrawler/db"
 	"strings"
 )
 
@@ -32,23 +33,38 @@ func (d Dispatcher) Dispatch() {
 		return
 	}
 
+	var poet util.Poet
+	var poems []util.Poem
+
 	switch t {
 	case "xs":
 		c := htmltype.NewXianDaiShi(d.uctx, d.res, d.doc)
 		if len(ps) == 4 { // 诗集的情况，一个页面一首诗
-			poems := c.GetOnePoemFromCollection()
-			util.Save(fn, d.uctx.URL().String(), poems)
+			poems = c.GetOnePoemFromCollection()
+			poet = c.GetPoet()
 		} else {
-			poems := c.Base.GetPoems()
-			util.Save(fn, d.uctx.URL().String(), poems)
+			poems = c.Base.GetPoems()
+			poet = c.GetPoet()
 		}
 	case "gs":
-	//c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
-	//poems := c.Base.GetPoems()
-	//util.Save(fn, d.uctx.URL().String(), poems)
+		c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
+		poems = c.Base.GetPoems()
+		poet = c.Base.GetPoet()
+
 	case "ws":
 		c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
-		poems := c.Base.GetPoems()
-		util.Save(fn, d.uctx.URL().String(), poems)
+		poems = c.Base.GetPoems()
+		poet = c.Base.GetPoet()
+	}
+
+	poetErr := util.CheckPoet(poet)
+	poemErr := util.CheckPoems(poems)
+	if poetErr || poemErr {
+		ep := util.ErrorPage{Url: d.uctx.URL().String()}
+		db.SaveErrorPage(ep)
+		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
+	} else {
+		db.SavePoet(poet)
+		db.SavePoems(poems)
 	}
 }

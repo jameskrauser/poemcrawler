@@ -64,8 +64,9 @@ func main() {
 	//c.Run("http://www.shiku.org/shiku/ws/wg/mallarme.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/haizi/154.htm")
 
-	c.Run("http://www.shiku.org/shiku/ws/wg/tyutchev/000.htm")
+	//c.Run("http://www.shiku.org/shiku/ws/wg/tyutchev/000.htm")
+	//c.Run("http://www.shiku.org/shiku/ws/wg/index.htm")
 
-	//c.Run("http://www.shiku.org/shiku/index.htm")
+	c.Run("http://www.shiku.org/shiku/index.htm")
 
 }

@@ -7,7 +7,7 @@ import (
 )
 
 // 处理国际诗歌的类型
-// 页面样例 http://www.shiku.org/shiku/gs/beichao.htm
+// 首页 http://www.shiku.org/shiku/ws/wg/index.htm
 type GuoJiShi struct {
 	Base *ShiKu
 	uctx *gocrawl.URLContext
