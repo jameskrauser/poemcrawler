@@ -46,25 +46,33 @@ func (d Dispatcher) Dispatch() {
 			poems = c.Base.GetPoems()
 			poet = c.GetPoet()
 		}
-	case "gs":
-		c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
-		poems = c.Base.GetPoems()
-		poet = c.Base.GetPoet()
-
-	case "ws":
-		c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
-		poems = c.Base.GetPoems()
-		poet = c.Base.GetPoet()
+	//case "gs":
+	//	c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
+	//	poems = c.Base.GetPoems()
+	//	poet = c.Base.GetPoet()
+	//
+	//case "ws":
+	//	c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
+	//	poems = c.Base.GetPoems()
+	//	poet = c.Base.GetPoet()
 	}
 
-	poetErr := util.CheckPoet(poet)
-	poemErr := util.CheckPoems(poems)
-	if poetErr || poemErr {
-		ep := util.ErrorPage{Url: d.uctx.URL().String()}
+	err := util.CheckPoet(poet)
+	if err != nil{
+		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message:err.Error()}
 		db.SaveErrorPage(ep)
 		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
-	} else {
-		db.SavePoet(poet)
-		db.SavePoems(poems)
+		return
 	}
+
+	err = util.CheckPoems(poems)
+	if err != nil{
+		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message:err.Error()}
+		db.SaveErrorPage(ep)
+		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
+		return
+	}
+
+	db.SavePoet(poet)
+	db.SavePoems(poems)
 }

@@ -6,6 +6,7 @@ import (
 	"github.com/axgle/mahonia"
 	"io/ioutil"
 	"strings"
+	"qiniupkg.com/x/errors.v7"
 )
 
 func GBK2Unicode(data []byte) string {
@@ -35,28 +36,41 @@ func SaveToFile(fn, url string, poet Poet, poems []Poem) {
 	}
 }
 
-func CheckPoet(p Poet) bool {
+func CheckPoet(p Poet) error {
 	name := strings.Replace(p.Name, " ", "", -1)
-	intro := strings.Replace(p.Intro, " ", "", -1)
+	//intro := strings.Replace(p.Intro, " ", "", -1)
 
-	if name == "" || intro == "" {
-		return true
+	if name == "" {
+		return errors.New("缺少诗人名字")
 	}
-	return false
+
+	//if intro == "" {
+	//	return errors.New("缺少诗人简介")
+	//}
+
+	return nil
 }
 
-func CheckPoems(ps []Poem) bool {
+func CheckPoems(ps []Poem) error {
 	for _, p := range ps {
 		author := strings.Replace(p.Author, " ", "", -1)
 		title := strings.Replace(p.Title, " ", "", -1)
 		body := strings.Replace(p.Body, " ", "", -1)
 
-		if author == "" || title == "" || body == "" {
-			return true
+		if author == "" {
+			return errors.New("缺少作者名字")
+		}
+
+		if title == "" {
+			return errors.New("缺少诗歌标题")
+		}
+
+		if body == "" {
+			return errors.New("缺少诗歌内容")
 		}
 	}
 
-	return false
+	return nil
 }
 
 func TrimRightSpace(s string) string {

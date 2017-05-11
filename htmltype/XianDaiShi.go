@@ -13,10 +13,10 @@ import (
 // 处理现代诗歌的类型
 // 页面样例 http://www.shiku.org/shiku/xs/xuzhimo.htm
 type XianDaiShi struct {
-	Base          *ShiKu
-	uctx          *gocrawl.URLContext
-	res           *http.Response
-	doc           *goquery.Document
+	Base *ShiKu
+	uctx *gocrawl.URLContext
+	res  *http.Response
+	doc  *goquery.Document
 }
 
 func NewXianDaiShi(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *XianDaiShi {
@@ -28,19 +28,75 @@ func NewXianDaiShi(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Do
 	}
 }
 
+func (t XianDaiShi) GetFirstPoemTitleWithSep() string {
+	titles := make([]string, 0, 0)
+	var title string
+	//has999999 := false
+	sep := "=============="
+	t.doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
+		href, existHref := s.Attr("href")
+		if existHref {
+			if strings.HasPrefix(href, "#") {
+				gbkTitle := s.Text()
+				titleBytes := []byte(gbkTitle)
+				title = strings.TrimSpace(util.GBK2Unicode(titleBytes))
+				titles = append(titles, title+sep)
+				s.AppendHtml(sep)
+				return
+			}
+		}
+
+		//name, existName := s.Attr("name")
+		//
+		//if existName {
+		//	if strings.Contains("0123456789", name[0:1]) {
+		//		t.doc.Find("body").Find("a[name=\"" + name + "\"]").AppendHtml(sep)
+		//	}
+		//}
+		//
+		//if name == "999999" {
+		//	has999999 = true
+		//}
+	})
+	if len(titles) > 0 {
+		return titles[0]
+	}
+
+	return ""
+}
+
 func (t XianDaiShi) GetPoet() util.Poet {
 	gbkAuthor := t.doc.Find("body").Find("h1").Text()
 	authorBytes := []byte(gbkAuthor)
 	author := util.GBK2Unicode(authorBytes)
 	author = strings.Replace(author, "诗选", "", -1)
 
-	gbkIntro := t.doc.Find("body").Find("h1").Next().Next().Text()
-	introBytes := []byte(gbkIntro)
-	intro := util.GBK2Unicode(introBytes)
+	ft := t.GetFirstPoemTitleWithSep()
+	if ft == "" {
+		poet := util.Poet{
+			Name:   author,
+			Intro:  "",
+			Source: t.uctx.URL().String(),
+		}
 
+		return poet
+	}
+
+	gbkText := t.doc.Find("body").Text()
+	TextBytes := []byte(gbkText)
+	text := strings.TrimSpace(util.GBK2Unicode(TextBytes))
+	text = strings.Replace(text, author+"诗选", "", 1)
+
+	index := strings.Index(text, ft)
+	if index > 0 {
+		text = text[0:index]
+	}
+
+	intro := strings.TrimSpace(text)
 	poet := util.Poet{
-		Name:  author,
-		Intro: intro,
+		Name:   author,
+		Intro:  intro,
+		Source: t.uctx.URL().String(),
 	}
 
 	return poet

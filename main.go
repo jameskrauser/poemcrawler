@@ -30,10 +30,15 @@ func (e *Ext) Filter(ctx *gocrawl.URLContext, isVisited bool) bool {
 		return false
 	}
 
-	if ctx.URL().Host == "www.shiku.org" && (strings.Contains(ctx.URL().Path, ".htm") ||
-		strings.Contains(ctx.URL().Path, ".html")) {
+	fmt.Println(ctx.URL().String())
+	if strings.Contains(ctx.URL().String(), "http://www.shiku.org/shiku/xs") &&
+		strings.Contains(ctx.URL().Path, ".htm") {
 		return true
 	}
+	//if ctx.URL().Host == "www.shiku.org" && (strings.Contains(ctx.URL().Path, ".htm") ||
+	//	strings.Contains(ctx.URL().Path, ".html")) {
+	//	return true
+	//}
 
 	return false
 }
@@ -45,7 +50,7 @@ func main() {
 	opts.CrawlDelay = 1 * time.Second
 	opts.LogFlags = gocrawl.LogError
 	opts.SameHostOnly = false
-	opts.MaxVisits = 1000000
+	opts.MaxVisits = 1
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
 	//c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
@@ -66,7 +71,8 @@ func main() {
 
 	//c.Run("http://www.shiku.org/shiku/ws/wg/tyutchev/000.htm")
 	//c.Run("http://www.shiku.org/shiku/ws/wg/index.htm")
-
-	c.Run("http://www.shiku.org/shiku/index.htm")
+	c.Run("http://www.shiku.org/shiku/xs/hanzuorong.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/index.htm")
+	//c.Run("http://www.shiku.org/shiku/index.htm")
 
 }

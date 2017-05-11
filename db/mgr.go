@@ -1,7 +1,6 @@
 package db
 
 import (
-	"log"
 	"gopkg.in/mgo.v2"
 )
 
@@ -22,7 +21,6 @@ type Manager struct {
 // NewManager 创建数据库管理器对象
 func NewManager() (*Manager, error) {
 	Session, err := mgo.Dial(uri)
-	log.Println(Session)
 	if err != nil {
 		return nil, err
 	}

@@ -11,9 +11,9 @@ import (
 )
 
 type ShiKu struct {
-	uctx *gocrawl.URLContext
-	res  *http.Response
-	doc  *goquery.Document
+	uctx          *gocrawl.URLContext
+	res           *http.Response
+	doc           *goquery.Document
 	HasParseError bool
 }
 
@@ -170,6 +170,7 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 		// 标题链接少于实际的诗歌体数量的情况，例如：http://www.shiku.org/shiku/ws/wg/mallarme.htm
 		if len(titles) != len(content) {
 			for _, whole := range content {
+				whole = strings.TrimLeft(whole, " ")
 				title := strings.Split(whole, " ")[0]
 				str := strings.TrimSpace(whole)
 				body := strings.TrimLeft(str, title)
@@ -189,6 +190,18 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 				whole := strings.TrimSpace(sep + content[i])
 				title := titles[i]
 				body := strings.Replace(whole, sep+title, "", -1)
+
+				// 网页本身有错误，标题为空
+				// 标题与内容混在一起：http://www.shiku.org/shiku/xs/hanzuorong.htm
+				if title == "" {
+					body = strings.Trim(body, " ")
+					body = strings.Trim(body, "\n")
+					arr := strings.Split(body, "\n")
+					if len(arr) > 1 {
+						title = strings.Replace(arr[0], " ", "", -1)
+					}
+				}
+
 				poem := util.Poem{
 					Author: poet.Name,
 					Source: t.uctx.URL().String(),
