@@ -15,7 +15,13 @@ type ShiKu struct {
 	res           *http.Response
 	doc           *goquery.Document
 	HasParseError bool
+	Poet          util.Poet
 }
+
+const (
+	ALinkTitleSep = "++++++++++++++++++++++++"
+	BodyTitleSep  = "========================"
+)
 
 func NewShiKu(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Document) *ShiKu {
 	return &ShiKu{uctx: uctx, res: res, doc: doc}
@@ -25,7 +31,6 @@ func (t ShiKu) GetFirstPoemTitleWithSep() string {
 	titles := make([]string, 0, 0)
 	var title string
 	//has999999 := false
-	sep := "=============="
 	t.doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
 		href, existHref := s.Attr("href")
 		if existHref {
@@ -33,8 +38,8 @@ func (t ShiKu) GetFirstPoemTitleWithSep() string {
 				gbkTitle := s.Text()
 				titleBytes := []byte(gbkTitle)
 				title = strings.TrimSpace(util.GBK2Unicode(titleBytes))
-				titles = append(titles, title+sep)
-				s.AppendHtml(sep)
+				titles = append(titles, title+ALinkTitleSep)
+				s.AppendHtml(ALinkTitleSep)
 				return
 			}
 		}
@@ -58,7 +63,6 @@ func (t ShiKu) GetFirstPoemTitleWithSep() string {
 	return ""
 }
 
-
 func (t ShiKu) GetPoet() util.Poet {
 	gbkStr := t.doc.Find("title").Text()
 	bytes := []byte(gbkStr)
@@ -74,16 +78,13 @@ func (t ShiKu) GetPoet() util.Poet {
 		}
 	}
 
-	var k=1
-	t.doc.Find("body").Find("h1").Each(func(i int, s *goquery.Selection) {
-		k++
-	})
-	fmt.Println(k)
-	gbkStr = t.doc.Find("body").Find("h1").Text()
-	bytes = []byte(gbkStr)
-	title = strings.TrimSpace(util.GBK2Unicode(bytes))
-	name = strings.TrimSpace(strings.Split(title, "诗选")[0])
-	name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+	if name == "" {
+		gbkStr = t.doc.Find("body").Find("h1").Text()
+		bytes = []byte(gbkStr)
+		title = strings.TrimSpace(util.GBK2Unicode(bytes))
+		name = strings.TrimSpace(strings.Split(title, "诗选")[0])
+		name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+	}
 
 	ft := t.GetFirstPoemTitleWithSep()
 	if ft == "" {
@@ -92,29 +93,30 @@ func (t ShiKu) GetPoet() util.Poet {
 			Intro:  "",
 			Source: t.uctx.URL().String(),
 		}
-		fmt.Println(poet)
-		return poet
+		t.Poet = poet
+
+	} else {
+		gbkStr = t.doc.Find("body").Text()
+		bytes = []byte(gbkStr)
+		text := strings.TrimSpace(util.GBK2Unicode(bytes))
+		text = strings.Replace(text, name+"诗选", "", 1)
+
+		index := strings.Index(text, ft)
+		if index > 0 {
+			text = text[0:index]
+		}
+
+		intro := strings.TrimSpace(text)
+		poet := util.Poet{
+			Name:   name,
+			Intro:  intro,
+			Source: t.uctx.URL().String(),
+		}
+		t.Poet = poet
+
 	}
-
-	gbkStr = t.doc.Find("body").Text()
-	bytes = []byte(gbkStr)
-	text := strings.TrimSpace(util.GBK2Unicode(bytes))
-	text = strings.Replace(text, name+"诗选", "", 1)
-
-	index := strings.Index(text, ft)
-	if index > 0 {
-		text = text[0:index]
-	}
-
-	intro := strings.TrimSpace(text)
-	poet := util.Poet{
-		Name:   name,
-		Intro:  intro,
-		Source: t.uctx.URL().String(),
-	}
-	fmt.Println(poet)
-
-	return poet
+	fmt.Println(t.Poet)
+	return t.Poet
 }
 
 // 标题为h2标签，诗歌内容为h2标签后第二个标签内
@@ -188,16 +190,16 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 	titles := make([]string, 0, 0)
 	poet := t.GetPoet()
 	poems = make([]util.Poem, 0, 0)
-	sep := "=============="
 
 	has999999 := false
 	t.doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
 		href, existHref := s.Attr("href")
 		if existHref {
-			if strings.HasPrefix(href, "#") {
+			if strings.Contains(href, "#") {
 				gbkTitle := s.Text()
 				titleBytes := []byte(gbkTitle)
 				title := strings.TrimSpace(util.GBK2Unicode(titleBytes))
+				title = strings.Replace(title, ALinkTitleSep, "", -1)
 				titles = append(titles, title)
 			}
 		}
@@ -206,7 +208,7 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 
 		if existName {
 			if strings.Contains("0123456789", name[0:1]) {
-				t.doc.Find("body").Find("a[name=\"" + name + "\"]").AppendHtml(sep)
+				t.doc.Find("body").Find("a[name=\"" + name + "\"]").AppendHtml(BodyTitleSep)
 			}
 		}
 
@@ -233,9 +235,8 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 	}
 
 	text = strings.TrimSpace(text)
-
-	textArr := strings.Split(text, sep)
-	if strings.Contains(text, sep) {
+	textArr := strings.Split(text, BodyTitleSep)
+	if strings.Contains(text, BodyTitleSep) {
 		content := textArr[1:]
 		if has999999 {
 			content = textArr[1:len(textArr)-1]
@@ -265,9 +266,9 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 		} else {
 			count := len(content)
 			for i := 0; i < count; i++ {
-				whole := strings.TrimSpace(sep + content[i])
+				whole := strings.TrimSpace(BodyTitleSep + content[i])
 				title := titles[i]
-				body := strings.Replace(whole, sep+title, "", -1)
+				body := strings.Replace(whole, BodyTitleSep+title, "", -1)
 
 				// 网页本身有错误，标题为空
 				// 标题与内容混在一起：http://www.shiku.org/shiku/xs/hanzuorong.htm

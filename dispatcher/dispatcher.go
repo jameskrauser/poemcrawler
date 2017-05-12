@@ -9,6 +9,7 @@ import (
 
 	"github.com/PuerkitoBio/gocrawl"
 	"github.com/PuerkitoBio/goquery"
+	//"fmt"
 	"fmt"
 )
 
@@ -30,7 +31,6 @@ func (d Dispatcher) Dispatch() {
 	t := ps[1]
 
 	suffix := ps[len(ps)-1]
-
 	if strings.Contains(suffix, "index") {
 		return
 	}
@@ -38,24 +38,26 @@ func (d Dispatcher) Dispatch() {
 	var poet util.Poet
 	var poems []util.Poem
 	var isPoemCollection = false
-
+	fmt.Println(ps)
 	switch t {
 	case "xs":
 		c := htmltype.NewXianDaiShi(d.uctx, d.res, d.doc)
-		if len(ps) == 4 { // 诗集的情况，一个页面一首诗
-			fmt.Println(ps)
+		if len(ps) == 4 {
 			if ps[2] == "yeshibin" {
-				fmt.Println("8888888888")
+				// 诗集的情况，一个页面多首诗
+				// 如：http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz_1.htm
 				poems = c.Base.GetPoems()
-				poet = c.GetPoet()
+				poet = c.Base.GetPoet()
 			} else {
+				// 诗集的情况，一个页面一首诗
+				// 如：http://www.shiku.org/shiku/xs/haizi/154.htm
 				poems = c.GetPoemFromOnePageOfCollection()
 				poet = c.GetPoetFromOnePageOfCollection()
-				isPoemCollection = true
 			}
+			isPoemCollection = true
 		} else {
 			poems = c.Base.GetPoems()
-			poet = c.GetPoet()
+			poet = c.Base.GetPoet()
 		}
 		//case "gs":
 		//	c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
@@ -73,7 +75,10 @@ func (d Dispatcher) Dispatch() {
 		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
 		db.SaveErrorPage(ep)
 		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
-		return
+	} else {
+		if !isPoemCollection {
+			db.SavePoet(poet)
+		}
 	}
 
 	err = util.CheckPoems(poems)
@@ -81,12 +86,7 @@ func (d Dispatcher) Dispatch() {
 		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
 		db.SaveErrorPage(ep)
 		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
-		return
+	} else {
+		db.SavePoems(poems)
 	}
-
-	if !isPoemCollection {
-		db.SavePoet(poet)
-	}
-
-	db.SavePoems(poems)
 }

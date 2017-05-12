@@ -50,7 +50,7 @@ func main() {
 	opts.CrawlDelay = 1 * time.Second
 	opts.LogFlags = gocrawl.LogError
 	opts.SameHostOnly = false
-	opts.MaxVisits = 1
+	opts.MaxVisits = 1000000
 
 	c := gocrawl.NewCrawlerWithOptions(opts)
 	//c.Run("http://www.shiku.org/shiku/xs/bianzhilin.htm")
@@ -75,9 +75,10 @@ func main() {
 	//c.Run("http://www.shiku.org/shiku/xs/beidao/160.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/guomoruo/guomr08.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz.htm")
-	c.Run("http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz_1.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz_1.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/yeshibin.htm")
-	//c.Run("http://www.shiku.org/shiku/xs/index.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/shenyinmo.htm")
+	c.Run("http://www.shiku.org/shiku/xs/index.htm")
 	//c.Run("http://www.shiku.org/shiku/index.htm")
 
 }
