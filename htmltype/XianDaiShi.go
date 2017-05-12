@@ -8,6 +8,7 @@ import (
 
 	"github.com/PuerkitoBio/gocrawl"
 	"github.com/PuerkitoBio/goquery"
+	"fmt"
 )
 
 // 处理现代诗歌的类型
@@ -66,26 +67,46 @@ func (t XianDaiShi) GetFirstPoemTitleWithSep() string {
 }
 
 func (t XianDaiShi) GetPoet() util.Poet {
-	gbkAuthor := t.doc.Find("body").Find("h1").Text()
-	authorBytes := []byte(gbkAuthor)
-	author := util.GBK2Unicode(authorBytes)
-	author = strings.Replace(author, "诗选", "", -1)
+	gbkStr := t.doc.Find("title").Text()
+	bytes := []byte(gbkStr)
+	title := strings.TrimSpace(util.GBK2Unicode(bytes))
+
+	var name string
+	arr := strings.Split(title, "::")
+
+	for _, v := range arr {
+		if strings.Contains(v, "诗选") || strings.Contains(v, "诗集") {
+			name = strings.TrimSpace(strings.Split(v, "诗选")[0])
+			name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+		}
+	}
+
+	var k=1
+	t.doc.Find("body").Find("h1").Each(func(i int, s *goquery.Selection) {
+		k++
+	})
+	fmt.Println(k)
+
+	gbkStr = t.doc.Find("body").Find("h1").Text()
+	bytes = []byte(gbkStr)
+	title = strings.TrimSpace(util.GBK2Unicode(bytes))
+	name = strings.TrimSpace(strings.Split(title, "诗选")[0])
+	name = strings.TrimSpace(strings.Split(name, "诗集")[0])
 
 	ft := t.GetFirstPoemTitleWithSep()
 	if ft == "" {
 		poet := util.Poet{
-			Name:   author,
+			Name:   name,
 			Intro:  "",
 			Source: t.uctx.URL().String(),
 		}
-
 		return poet
 	}
 
-	gbkText := t.doc.Find("body").Text()
-	TextBytes := []byte(gbkText)
-	text := strings.TrimSpace(util.GBK2Unicode(TextBytes))
-	text = strings.Replace(text, author+"诗选", "", 1)
+	gbkStr = t.doc.Find("body").Text()
+	bytes = []byte(gbkStr)
+	text := strings.TrimSpace(util.GBK2Unicode(bytes))
+	text = strings.Replace(text, name+"诗选", "", 1)
 
 	index := strings.Index(text, ft)
 	if index > 0 {
@@ -94,11 +115,46 @@ func (t XianDaiShi) GetPoet() util.Poet {
 
 	intro := strings.TrimSpace(text)
 	poet := util.Poet{
-		Name:   author,
+		Name:   name,
 		Intro:  intro,
 		Source: t.uctx.URL().String(),
 	}
+	fmt.Println(poet)
 
+	return poet
+}
+
+func (t XianDaiShi) GetPoetFromOnePageOfCollection() util.Poet {
+	gbkStr := t.doc.Find("title").Text()
+	bytes := []byte(gbkStr)
+	title := strings.TrimSpace(util.GBK2Unicode(bytes))
+
+	var name string
+	arr := strings.Split(title, "::")
+
+	for _, v := range arr {
+		if strings.Contains(v, "诗选") || strings.Contains(v, "诗集") {
+			name = strings.TrimSpace(strings.Split(v, "诗选")[0])
+			name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+		}
+	}
+
+	// 标题里面不包括诗人名字的情况
+	// 如：http://www.shiku.org/shiku/xs/guomoruo/guomr08.htm
+	if name == "" {
+		gbkStr = t.doc.Find("body").Find("a[href=\"index.htm\"]").Text()
+		bytes = []byte(gbkStr)
+		title = strings.TrimSpace(util.GBK2Unicode(bytes))
+		name = strings.TrimSpace(strings.Split(title, "诗选")[0])
+		name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+	}
+
+	poet := util.Poet{
+		Name:   name,
+		Source: t.uctx.URL().String(),
+	}
+
+	fmt.Println(poet)
 	return poet
 }
 
@@ -170,15 +226,17 @@ func (t XianDaiShi) GetPoemsPAndP() (poems []util.Poem) {
 
 // 获取诗集中的单首诗歌，返回只有一首诗歌的诗歌数组
 // 例子页面：http://www.shiku.org/shiku/xs/haizi/100.htm
-func (t XianDaiShi) GetOnePoemFromCollection() (poems []util.Poem) {
+func (t XianDaiShi) GetPoemFromOnePageOfCollection() (poems []util.Poem) {
+	poet := t.GetPoetFromOnePageOfCollection()
+
 	gbkTitle := t.doc.Find("body").Find("h1").Text()
 	titleBytes := []byte(gbkTitle)
 	title := strings.TrimSpace(util.GBK2Unicode(titleBytes))
 
-	gbkAuthor := t.doc.Find("a").Eq(0).Text()
-	authorBytes := []byte(gbkAuthor)
-	author := strings.TrimSpace(util.GBK2Unicode(authorBytes))
-	author = strings.Replace(author, "诗集", "", -1)
+	//gbkAuthor := t.doc.Find("a").Eq(0).Text()
+	//authorBytes := []byte(gbkAuthor)
+	//author := strings.TrimSpace(util.GBK2Unicode(authorBytes))
+	//author = strings.Replace(author, "诗集", "", -1)
 
 	gbkPoemBody := t.doc.Find("pre").Text()
 	poemBodyBytes := []byte(gbkPoemBody)
@@ -190,7 +248,7 @@ func (t XianDaiShi) GetOnePoemFromCollection() (poems []util.Poem) {
 	}
 
 	poem := util.Poem{
-		Author: author,
+		Author: poet.Name,
 		Source: t.uctx.URL().String(),
 		Title:  title,
 		Body:   poemBody,

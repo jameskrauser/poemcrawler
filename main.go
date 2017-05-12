@@ -71,7 +71,12 @@ func main() {
 
 	//c.Run("http://www.shiku.org/shiku/ws/wg/tyutchev/000.htm")
 	//c.Run("http://www.shiku.org/shiku/ws/wg/index.htm")
-	c.Run("http://www.shiku.org/shiku/xs/hanzuorong.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/hanzuorong.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/beidao/160.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/guomoruo/guomr08.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz.htm")
+	c.Run("http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz_1.htm")
+	//c.Run("http://www.shiku.org/shiku/xs/yeshibin.htm")
 	//c.Run("http://www.shiku.org/shiku/xs/index.htm")
 	//c.Run("http://www.shiku.org/shiku/index.htm")
 

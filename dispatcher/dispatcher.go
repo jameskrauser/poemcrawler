@@ -1,13 +1,15 @@
 package dispatcher
 
 import (
-	"github.com/PuerkitoBio/gocrawl"
-	"github.com/PuerkitoBio/goquery"
 	"net/http"
+	"poemcrawler/db"
 	"poemcrawler/htmltype"
 	"poemcrawler/util"
-	"poemcrawler/db"
 	"strings"
+
+	"github.com/PuerkitoBio/gocrawl"
+	"github.com/PuerkitoBio/goquery"
+	"fmt"
 )
 
 type Dispatcher struct {
@@ -35,44 +37,56 @@ func (d Dispatcher) Dispatch() {
 
 	var poet util.Poet
 	var poems []util.Poem
+	var isPoemCollection = false
 
 	switch t {
 	case "xs":
 		c := htmltype.NewXianDaiShi(d.uctx, d.res, d.doc)
 		if len(ps) == 4 { // 诗集的情况，一个页面一首诗
-			poems = c.GetOnePoemFromCollection()
-			poet = c.GetPoet()
+			fmt.Println(ps)
+			if ps[2] == "yeshibin" {
+				fmt.Println("8888888888")
+				poems = c.Base.GetPoems()
+				poet = c.GetPoet()
+			} else {
+				poems = c.GetPoemFromOnePageOfCollection()
+				poet = c.GetPoetFromOnePageOfCollection()
+				isPoemCollection = true
+			}
 		} else {
 			poems = c.Base.GetPoems()
 			poet = c.GetPoet()
 		}
-	//case "gs":
-	//	c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
-	//	poems = c.Base.GetPoems()
-	//	poet = c.Base.GetPoet()
-	//
-	//case "ws":
-	//	c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
-	//	poems = c.Base.GetPoems()
-	//	poet = c.Base.GetPoet()
+		//case "gs":
+		//	c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
+		//	poems = c.Base.GetPoems()
+		//	poet = c.Base.GetPoet()
+		//
+		//case "ws":
+		//	c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
+		//	poems = c.Base.GetPoems()
+		//	poet = c.Base.GetPoet()
 	}
 
 	err := util.CheckPoet(poet)
-	if err != nil{
-		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message:err.Error()}
+	if err != nil {
+		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
 		db.SaveErrorPage(ep)
 		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
 		return
 	}
 
 	err = util.CheckPoems(poems)
-	if err != nil{
-		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message:err.Error()}
+	if err != nil {
+		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
 		db.SaveErrorPage(ep)
 		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
 		return
 	}
 
-	db.SavePoet(poet)
+	if !isPoemCollection {
+		db.SavePoet(poet)
+	}
+
 	db.SavePoems(poems)
 }

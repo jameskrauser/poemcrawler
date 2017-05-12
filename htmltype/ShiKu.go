@@ -21,20 +21,98 @@ func NewShiKu(uctx *gocrawl.URLContext, res *http.Response, doc *goquery.Documen
 	return &ShiKu{uctx: uctx, res: res, doc: doc}
 }
 
-func (t ShiKu) GetPoet() util.Poet {
-	gbkAuthor := t.doc.Find("body").Find("h1").Text()
-	authorBytes := []byte(gbkAuthor)
-	author := util.GBK2Unicode(authorBytes)
-	author = strings.Replace(author, "诗选", "", -1)
+func (t ShiKu) GetFirstPoemTitleWithSep() string {
+	titles := make([]string, 0, 0)
+	var title string
+	//has999999 := false
+	sep := "=============="
+	t.doc.Find("body").Find("a").Each(func(i int, s *goquery.Selection) {
+		href, existHref := s.Attr("href")
+		if existHref {
+			if strings.HasPrefix(href, "#") {
+				gbkTitle := s.Text()
+				titleBytes := []byte(gbkTitle)
+				title = strings.TrimSpace(util.GBK2Unicode(titleBytes))
+				titles = append(titles, title+sep)
+				s.AppendHtml(sep)
+				return
+			}
+		}
 
-	gbkIntro := t.doc.Find("body").Find("h1").Next().Next().Text()
-	introBytes := []byte(gbkIntro)
-	intro := util.GBK2Unicode(introBytes)
-
-	poet := util.Poet{
-		Name:  author,
-		Intro: intro,
+		//name, existName := s.Attr("name")
+		//
+		//if existName {
+		//	if strings.Contains("0123456789", name[0:1]) {
+		//		t.doc.Find("body").Find("a[name=\"" + name + "\"]").AppendHtml(sep)
+		//	}
+		//}
+		//
+		//if name == "999999" {
+		//	has999999 = true
+		//}
+	})
+	if len(titles) > 0 {
+		return titles[0]
 	}
+
+	return ""
+}
+
+
+func (t ShiKu) GetPoet() util.Poet {
+	gbkStr := t.doc.Find("title").Text()
+	bytes := []byte(gbkStr)
+	title := strings.TrimSpace(util.GBK2Unicode(bytes))
+
+	var name string
+	arr := strings.Split(title, "::")
+
+	for _, v := range arr {
+		if strings.Contains(v, "诗选") || strings.Contains(v, "诗集") {
+			name = strings.TrimSpace(strings.Split(v, "诗选")[0])
+			name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+		}
+	}
+
+	var k=1
+	t.doc.Find("body").Find("h1").Each(func(i int, s *goquery.Selection) {
+		k++
+	})
+	fmt.Println(k)
+	gbkStr = t.doc.Find("body").Find("h1").Text()
+	bytes = []byte(gbkStr)
+	title = strings.TrimSpace(util.GBK2Unicode(bytes))
+	name = strings.TrimSpace(strings.Split(title, "诗选")[0])
+	name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+
+	ft := t.GetFirstPoemTitleWithSep()
+	if ft == "" {
+		poet := util.Poet{
+			Name:   name,
+			Intro:  "",
+			Source: t.uctx.URL().String(),
+		}
+		fmt.Println(poet)
+		return poet
+	}
+
+	gbkStr = t.doc.Find("body").Text()
+	bytes = []byte(gbkStr)
+	text := strings.TrimSpace(util.GBK2Unicode(bytes))
+	text = strings.Replace(text, name+"诗选", "", 1)
+
+	index := strings.Index(text, ft)
+	if index > 0 {
+		text = text[0:index]
+	}
+
+	intro := strings.TrimSpace(text)
+	poet := util.Poet{
+		Name:   name,
+		Intro:  intro,
+		Source: t.uctx.URL().String(),
+	}
+	fmt.Println(poet)
 
 	return poet
 }
