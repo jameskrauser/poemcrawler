@@ -115,7 +115,7 @@ func (t ShiKu) GetPoet() util.Poet {
 		t.Poet = poet
 
 	}
-	fmt.Println(t.Poet)
+
 	return t.Poet
 }
 
@@ -253,6 +253,7 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 				title := strings.Split(whole, " ")[0]
 				str := strings.TrimSpace(whole)
 				body := strings.TrimLeft(str, title)
+				body = strings.Replace(body, BodyTitleSep, "", -1)
 
 				poem := util.Poem{
 					Author: poet.Name,
@@ -269,6 +270,7 @@ func (t ShiKu) GetPoems() (poems []util.Poem) {
 				whole := strings.TrimSpace(BodyTitleSep + content[i])
 				title := titles[i]
 				body := strings.Replace(whole, BodyTitleSep+title, "", -1)
+				body = strings.Replace(body, BodyTitleSep, "", -1)
 
 				// 网页本身有错误，标题为空
 				// 标题与内容混在一起：http://www.shiku.org/shiku/xs/hanzuorong.htm

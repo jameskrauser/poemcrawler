@@ -9,8 +9,6 @@ import (
 
 	"github.com/PuerkitoBio/gocrawl"
 	"github.com/PuerkitoBio/goquery"
-	//"fmt"
-	"fmt"
 )
 
 type Dispatcher struct {
@@ -38,7 +36,7 @@ func (d Dispatcher) Dispatch() {
 	var poet util.Poet
 	var poems []util.Poem
 	var isPoemCollection = false
-	fmt.Println(ps)
+
 	switch t {
 	case "xs":
 		c := htmltype.NewXianDaiShi(d.uctx, d.res, d.doc)
