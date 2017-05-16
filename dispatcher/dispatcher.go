@@ -9,6 +9,7 @@ import (
 
 	"github.com/PuerkitoBio/gocrawl"
 	"github.com/PuerkitoBio/goquery"
+	"fmt"
 )
 
 type Dispatcher struct {
@@ -38,34 +39,36 @@ func (d Dispatcher) Dispatch() {
 	var isPoemCollection = false
 
 	switch t {
-	case "xs":
-		c := htmltype.NewXianDaiShi(d.uctx, d.res, d.doc)
-		if len(ps) == 4 {
-			if ps[2] == "yeshibin" {
-				// 诗集的情况，一个页面多首诗
-				// 如：http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz_1.htm
-				poems = c.Base.GetPoems()
-				poet = c.Base.GetPoet()
-			} else {
-				// 诗集的情况，一个页面一首诗
-				// 如：http://www.shiku.org/shiku/xs/haizi/154.htm
-				poems = c.GetPoemFromOnePageOfCollection()
-				poet = c.GetPoetFromOnePageOfCollection()
-			}
-			isPoemCollection = true
-		} else {
-			poems = c.Base.GetPoems()
-			poet = c.Base.GetPoet()
-		}
-		//case "gs":
-		//	c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
-		//	poems = c.Base.GetPoems()
-		//	poet = c.Base.GetPoet()
-		//
-		//case "ws":
-		//	c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
-		//	poems = c.Base.GetPoems()
-		//	poet = c.Base.GetPoet()
+	//case "xs":
+	//	c := htmltype.NewXianDaiShi(d.uctx, d.res, d.doc)
+	//	if len(ps) == 4 {
+	//		if ps[2] == "yeshibin" {
+	//			// 诗集的情况，一个页面多首诗
+	//			// 如：http://www.shiku.org/shiku/xs/yeshibin/yeshibin_ztz_1.htm
+	//			poems = c.GetPoems()
+	//			poet = c.GetPoet()
+	//		} else {
+	//			// 诗集的情况，一个页面一首诗
+	//			// 如：http://www.shiku.org/shiku/xs/haizi/154.htm
+	//			poems = c.GetPoemFromOnePageOfCollection()
+	//			poet = c.GetPoetFromOnePageOfCollection()
+	//		}
+	//		isPoemCollection = true
+	//	} else {
+	//		poems = c.GetPoems()
+	//		poet = c.GetPoet()
+	//	}
+	//case "gs":
+	//	c := htmltype.NewGuDianShi(d.uctx, d.res, d.doc)
+	//	poems = c.Base.GetPoems()
+	//	poet = c.Base.GetPoet()
+	//
+	case "ws":
+		c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
+		poems = c.GetPoems()
+		poet = c.Poet
+		fmt.Println(poet)
+		//poet = c.GetPoet()
 	}
 
 	err := util.CheckPoet(poet)
