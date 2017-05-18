@@ -9,3 +9,5 @@ target
 /.sbtserver
 project/.sbtserver
 project/.sbtserver.lock
+andrade.html
+*.html

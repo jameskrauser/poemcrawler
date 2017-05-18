@@ -94,12 +94,10 @@ func GetPoet(uctx *gocrawl.URLContext, doc *goquery.Document) (poet util.Poet) {
 	}
 
 	ft := GetFirstPoemTitleWithSep(doc)
-	fmt.Println("ssssssssss" + ft)
 	if ft == "" {
 		// 处理页面上诗人简介下面的标题不是链接的情况
 		// http://www.shiku.org/shiku/ws/wg/corneille.htm
 		bft := GetFirstPoemTitleWithSep1FromPoemBody(doc)
-		fmt.Println("uuuuuu" + bft)
 		if bft == "" {
 			poet = util.Poet{
 				Name:   name,
@@ -213,11 +211,18 @@ func (t GuoJiShi) GetPoems() (poems []util.Poem) {
 		// 标题链接少于实际的诗歌体数量的情况，例如：http://www.shiku.org/shiku/ws/wg/mallarme.htm
 		if len(titles) != len(content) {
 			for _, whole := range content {
+				var title string
 				whole = strings.TrimLeft(whole, " ")
-				title := strings.Split(whole, " ")[0]
+				if strings.Contains(whole, BodyTitleSep1){
+					title = strings.Split(whole, BodyTitleSep1)[0]
+				}else{
+					title = strings.Split(whole, " ")[0]
+				}
+
 				str := strings.TrimSpace(whole)
 				body := strings.TrimLeft(str, title)
 				body = strings.Replace(body, BodyTitleSep, "", -1)
+				body = strings.Replace(body, BodyTitleSep1, "", -1)
 
 				poem := util.Poem{
 					Author: poet.Name,
