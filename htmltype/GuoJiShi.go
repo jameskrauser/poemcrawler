@@ -89,8 +89,10 @@ func GetPoet(uctx *gocrawl.URLContext, doc *goquery.Document) (poet util.Poet) {
 		gbkStr = doc.Find("body").Find("h1").Text()
 		bytes = []byte(gbkStr)
 		title = strings.TrimSpace(util.GBK2Unicode(bytes))
-		name = strings.TrimSpace(strings.Split(title, "诗选")[0])
-		name = strings.TrimSpace(strings.Split(name, "诗集")[0])
+		name = strings.Replace(title, "Poems by", "", -1)
+		name = strings.Replace(name, "诗集", "", -1)
+		name = strings.Replace(name, "诗选", "", -1)
+		name = strings.TrimSpace(name)
 	}
 
 	ft := GetFirstPoemTitleWithSep(doc)

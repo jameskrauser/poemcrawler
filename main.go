@@ -60,8 +60,10 @@ func main() {
 	c := gocrawl.NewCrawlerWithOptions(opts)
 
 	//c.Run("http://www.shiku.org/shiku/xs/index.htm")
+	c.Run("http://www.shiku.org/shiku/ws/ww/catullus.htm")
+	c.Run("http://www.shiku.org/shiku/ws/wg/fairburn.htm")
 	//c.Run("http://www.shiku.org/shiku/ws/index.htm")
-	c.Run("http://www.shiku.org/shiku/ws/wg/dante/index.htm")
+	//c.Run("http://www.shiku.org/shiku/ws/wg/dante/index.htm")
 	//c.Run("http://www.shiku.org/shiku/ws/wg/corneille.htm")
 	//c.Run("http://www.shiku.org/shiku/index.htm")
 
