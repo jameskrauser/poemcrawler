@@ -182,21 +182,9 @@ func (t GuoJiShi) GetPoems() (poems []util.Poem) {
 	gbkText := t.doc.Text()
 	TextBytes := []byte(gbkText)
 	text := strings.TrimSpace(util.GBK2Unicode(TextBytes))
-	// 去掉页脚文字：中国诗歌库 中华诗库 中国诗典 中国诗人 中国诗坛 首页
-	text = strings.Replace(text, "中国诗歌库", "", -1)
-	text = strings.Replace(text, "中华诗库", "", -1)
-	text = strings.Replace(text, "中国诗典", "", -1)
-	text = strings.Replace(text, "中国诗人", "", -1)
-	text = strings.Replace(text, "中国诗坛", "", -1)
-	text = strings.Replace(text, "首页", "", -1)
-	// 可能页面底部有以_uacct开头的js文字
-	// 例如页面： http://www.shiku.org/shiku/ws/wg/corneille.htm
-	index := strings.Index(text, "_uacct")
-	if index > 0 {
-		text = text[0:index]
-	}
-
+	text = removeBottomText(text)
 	text = strings.TrimSpace(text)
+
 	textArr := strings.Split(text, BodyTitleSep)
 	if strings.Contains(text, BodyTitleSep) {
 		content := textArr[1:]
@@ -213,9 +201,9 @@ func (t GuoJiShi) GetPoems() (poems []util.Poem) {
 			for _, whole := range content {
 				var title string
 				whole = strings.TrimLeft(whole, " ")
-				if strings.Contains(whole, BodyTitleSep1){
+				if strings.Contains(whole, BodyTitleSep1) {
 					title = strings.Split(whole, BodyTitleSep1)[0]
-				}else{
+				} else {
 					title = strings.Split(whole, " ")[0]
 				}
 
@@ -265,4 +253,62 @@ func (t GuoJiShi) GetPoems() (poems []util.Poem) {
 	}
 
 	return
+}
+
+// 获取但丁的神曲
+// http://www.shiku.org/shiku/ws/wg/dante/index.htm
+func (t GuoJiShi) GetDanDingShenQu() (poems []util.Poem) {
+	poems = make([]util.Poem, 0, 0)
+
+	gbkTitle := t.doc.Find("body").Find("p[align=\"center\"]").Text()
+	bytes := []byte(gbkTitle)
+	order := strings.TrimSpace(util.GBK2Unicode(bytes))
+
+	sep := "**************"
+	t.doc.Find("body").Find("p[align=\"center\"]").AppendHtml(sep)
+
+	gbkText := t.doc.Text()
+	bytes = []byte(gbkText)
+	text := strings.TrimSpace(util.GBK2Unicode(bytes))
+
+	col := strings.Split(text, order)[0]
+	col = strings.Replace(col, "[意] 但丁：", "", -1)
+	col = strings.Replace(col, " ", "", -1)
+	col = strings.Replace(col, "\r", "", -1)
+	col = strings.Replace(col, "\n", "", -1)
+	title := col + "·" + order
+
+	text = strings.Split(text, sep)[1]
+	body := removeBottomText(text)
+	body = strings.TrimSpace(body)
+
+	poem := util.Poem{
+		Author: "但丁",
+		Source: t.uctx.URL().String(),
+		Title:  title,
+		Body:   body,
+	}
+
+	poems = append(poems, poem)
+
+	return poems
+}
+
+// 去掉页脚文字以及以_uacct开头的js文字
+func removeBottomText(s string) string {
+	s = strings.Replace(s, "中国诗歌库", "", -1)
+	s = strings.Replace(s, "中华诗库", "", -1)
+	s = strings.Replace(s, "中国诗典", "", -1)
+	s = strings.Replace(s, "中国诗人", "", -1)
+	s = strings.Replace(s, "中国诗坛", "", -1)
+	s = strings.Replace(s, "首页", "", -1)
+
+	// 可能页面底部有以_uacct开头的js文字
+	// 例如页面： http://www.shiku.org/shiku/ws/wg/corneille.htm
+	index := strings.Index(s, "_uacct")
+	if index > 0 {
+		s = s[0:index]
+	}
+
+	return s
 }

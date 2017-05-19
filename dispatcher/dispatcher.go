@@ -37,6 +37,7 @@ func (d Dispatcher) Dispatch() {
 	var poet util.Poet
 	var poems []util.Poem
 	var isPoemCollection = false
+	var hasPoet = false
 
 	switch t {
 	//case "xs":
@@ -65,24 +66,31 @@ func (d Dispatcher) Dispatch() {
 	//
 	case "ws":
 		c := htmltype.NewGuoJiShi(d.uctx, d.res, d.doc)
-		poems = c.GetPoems()
-		poet = c.Poet
-		fmt.Println(poet)
-		//poet = c.GetPoet()
-	}
-
-	err := util.CheckPoet(poet)
-	if err != nil {
-		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
-		db.SaveErrorPage(ep)
-		util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
-	} else {
-		if !isPoemCollection {
-			db.SavePoet(poet)
+		fmt.Println(ps)
+		if len(ps) == 5 && ps[3] == "dante" {
+			poems = c.GetDanDingShenQu()
+			hasPoet = false
+		} else {
+			poems = c.GetPoems()
+			poet = c.Poet
+			hasPoet = true
 		}
 	}
 
-	err = util.CheckPoems(poems)
+	if hasPoet {
+		err := util.CheckPoet(poet)
+		if err != nil {
+			ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
+			db.SaveErrorPage(ep)
+			util.SaveToFile(fn, d.uctx.URL().String(), poet, poems)
+		} else {
+			if !isPoemCollection {
+				db.SavePoet(poet)
+			}
+		}
+	}
+
+	err := util.CheckPoems(poems)
 	if err != nil {
 		ep := util.ErrorPage{Url: d.uctx.URL().String(), Message: err.Error()}
 		db.SaveErrorPage(ep)
